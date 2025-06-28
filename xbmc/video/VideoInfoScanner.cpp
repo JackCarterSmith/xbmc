@@ -1035,7 +1035,7 @@ CVideoInfoScanner::~CVideoInfoScanner()
         // fast hash failed - compute slow one
         if (hash.empty())
         {
-          // force sorting consistency to avoid hash missmatch between platform
+          // force sorting consistency to avoid hash mismatch between platforms
           items.Sort(SortByFile, SortOrderAscending, SortAttributeNone);
           GetPathHash(items, hash);
           if (StringUtils::EqualsNoCase(dbHash, hash))
@@ -2287,12 +2287,12 @@ CVideoInfoScanner::~CVideoInfoScanner()
       {
         const int64_t size{pItem->GetSize()};
         digest.Update(&size, sizeof(size));
-        // linux and windows platform don't follow the same output format, force them for concistency
+        // linux and windows platform don't follow the same output format, force them for consistency
         const CDateTime& dateTime{pItem->GetDateTime()};
         if (dateTime.IsValid())
-          digest.Update(StringUtils::Format(
-              "{:02}.{:02}.{:04} {:02}:{:02}:{:02}", dateTime.GetDay(), dateTime.GetMonth(),
-              dateTime.GetYear(), dateTime.GetHour(), dateTime.GetMinute(), dateTime.GetSecond()));
+          digest.Update(StringUtils::Format("{:02}.{:02}.{:04} {:02}:{:02}:{:02}",
+                                            dateTime.GetDay(), dateTime.GetMonth(), dateTime.GetYear(),
+                                            dateTime.GetHour(), dateTime.GetMinute(), dateTime.GetSecond()));
       }
       if (IsVideo(*pItem) && !PLAYLIST::IsPlayList(*pItem) && !pItem->IsNFO())
         count++;
