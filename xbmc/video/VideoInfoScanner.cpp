@@ -1036,7 +1036,7 @@ CVideoInfoScanner::~CVideoInfoScanner()
         if (hash.empty())
         {
           // force sorting consistency to avoid hash mismatch between platforms
-          // sort by filename as always present for any files, but keep case sensitiveness
+          // sort by filename as always present for any files, but keep case sensitivity
           items.Sort(SortByFile, SortOrderAscending, SortAttributeNone);
           GetPathHash(items, hash);
           if (StringUtils::EqualsNoCase(dbHash, hash))
@@ -2281,21 +2281,27 @@ CVideoInfoScanner::~CVideoInfoScanner()
 
         const CDateTime& dateTime{pItem->GetDateTime()};
         if (dateTime.IsValid())
+        {
           digest.Update(StringUtils::Format("{:02}.{:02}.{:04}", dateTime.GetDay(),
                                             dateTime.GetMonth(), dateTime.GetYear()));
+        }
       }
       else
       {
         const int64_t size{pItem->GetSize()};
         digest.Update(&size, sizeof(size));
-        // linux and windows platform don't follow the same output format (linux return a zero value for milliseconds member)
-        // for consistency, use string format instead and discard milliseconds field.
-        // unless a modification occur during the 1 second window when kodi hash and update this particular file, we are safe.
+        // linux and windows platform don't follow the same output format 
+        // (linux return a zero value for milliseconds member).
+        // for consistency, use string format instead and discard milliseconds 
+        // field. Unless a modification occur during the 1 second window when 
+        // kodi hash and update this particular file, we are safe.
         const CDateTime& dateTime{pItem->GetDateTime()};
         if (dateTime.IsValid())
-          digest.Update(StringUtils::Format("{:02}.{:02}.{:04} {:02}:{:02}:{:02}",
-                                            dateTime.GetDay(), dateTime.GetMonth(), dateTime.GetYear(),
+        {
+          digest.Update(StringUtils::Format("{:02}.{:02}.{:04} {:02}:{:02}:{:02}", 
+                                            dateTime.GetDay(), dateTime.GetMonth(), dateTime.GetYear(), 
                                             dateTime.GetHour(), dateTime.GetMinute(), dateTime.GetSecond()));
+        }
       }
       if (IsVideo(*pItem) && !PLAYLIST::IsPlayList(*pItem) && !pItem->IsNFO())
         count++;
