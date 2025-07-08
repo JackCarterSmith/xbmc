@@ -356,6 +356,10 @@ CVideoInfoScanner::~CVideoInfoScanner()
                     items.end());
         items.Stack();
 
+        // force sorting consistency to avoid hash mismatch between platforms
+        // sort by filename as always present for any files, but keep case sensitivity
+        items.Sort(SortByFile, SortOrderAscending, SortAttributeNone);
+
         // check whether to re-use previously computed fast hash
         if (!CanFastHash(items, regexps) || fastHash.empty())
           GetPathHash(items, hash);
@@ -400,6 +404,11 @@ CVideoInfoScanner::~CVideoInfoScanner()
         CDirectory::GetDirectory(strDirectory, items, CServiceBroker::GetFileExtensionProvider().GetVideoExtensions(),
                                  DIR_FLAG_DEFAULTS);
         items.SetPath(strDirectory);
+
+        // force sorting consistency to avoid hash mismatch between platforms
+        // sort by filename as always present for any files, but keep case sensitivity
+        items.Sort(SortByFile, SortOrderAscending, SortAttributeNone);
+
         GetPathHash(items, hash);
         bSkip = true;
         if (!m_database.GetPathHash(strDirectory, dbHash) || !StringUtils::EqualsNoCase(dbHash, hash))
@@ -2292,16 +2301,13 @@ CVideoInfoScanner::~CVideoInfoScanner()
         digest.Update(&size, sizeof(size));
         // linux and windows platform don't follow the same output format 
         // (linux return a zero value for milliseconds member).
-        // for consistency, use string format instead and discard milliseconds 
-        // field. Unless a modification occur during the 1 second window when 
+        // for consistency, use less precise format instead which discard
+        // milliseconds value.
+        // Unless a modification occur during the 1 second window when 
         // kodi hash and update this particular file, we are safe.
-        const CDateTime& dateTime{pItem->GetDateTime()};
-        if (dateTime.IsValid())
-        {
-          digest.Update(StringUtils::Format("{:02}.{:02}.{:04} {:02}:{:02}:{:02}", 
-                                            dateTime.GetDay(), dateTime.GetMonth(), dateTime.GetYear(), 
-                                            dateTime.GetHour(), dateTime.GetMinute(), dateTime.GetSecond()));
-        }
+        time_t tt{};
+        pItem->GetDateTime().GetAsTime(tt);
+        digest.Update(&tt, sizeof(tt));
       }
       if (IsVideo(*pItem) && !PLAYLIST::IsPlayList(*pItem) && !pItem->IsNFO())
         count++;
